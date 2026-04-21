@@ -1,0 +1,44 @@
+image:
+  node: "node:24-trixie@sha256:554a85065c0157a254a5a063ea2294f6e2822e6333c3de5eb2269e2d7c755665" # run `make freeze` to append digest
+npm:
+  "@quasar/cli": "4.0.0"
+  "@google/gemini-cli": "0.38.2"
+  "opencode-ai": "1.14.19"
+yarn: "4.14.1"
+scripts:
+  claude:
+    version: "2.1.114"
+    url: "https://downloads.claude.ai/claude-code-releases/${version}/linux-x64/claude"
+  # kimi:
+  #   version: "0.11.7"
+  #   url: "https://releases.astral.sh/github/uv/releases/download/${version}/uv-x86_64-unknown-linux-gnu.tar.gz"
+  mistral:
+    version: "2.7.6"
+    build: "builders/mistral/build.sh"
+    artifact: "mistral-vibe-offline.tar.gz"
+  # copilot:
+  #   version: "1.0.0"
+  #   url: ""
+apt: # run `make freeze` to pin versions
+  - bison=2:3.8.2+dfsg-1+b2
+  - build-essential=12.12
+  - ca-certificates=20250419
+  - curl=8.14.1-2+deb13u2
+  - dnsutils
+  - git=1:2.47.3-0+deb13u1
+  - iputils-ping=3:20240905-3
+  - libffi-dev=3.4.8-2
+  - libncurses-dev=6.5+20250216-2
+  - libreadline-dev=8.2-6
+  - libssl-dev=3.5.5-1~deb13u1
+  - libyaml-dev=0.2.5-2
+  - makeself=2.5.0-1
+  - openssh-client=1:10.0p1-7+deb13u1
+  - python3=3.13.5-1
+  - python3-pip=25.1.1+dfsg-1
+  - python3-venv=3.13.5-1
+  - sudo=1.9.16p2-3+deb13u1
+  - vim=2:9.1.1230-2
+  - wget=1.25.0-2
+  - xz-utils=5.8.1-1
+  - zlib1g-dev=1:1.3.dfsg+really1.3.1-1+b1
