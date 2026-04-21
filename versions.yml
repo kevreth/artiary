@@ -1,6 +1,8 @@
 image:
   node: "node:24-trixie@sha256:554a85065c0157a254a5a063ea2294f6e2822e6333c3de5eb2269e2d7c755665" # run `make freeze` to append digest
 npm:
+  "@charmland/crush": "0.61.1"
+  "@openai/codex": "0.122.0"
   "@quasar/cli": "4.0.0"
   "@google/gemini-cli": "0.38.2"
   "opencode-ai": "1.14.19"

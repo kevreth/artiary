@@ -84,14 +84,21 @@ rm -f "$APT_DIR/pkglist.txt"
 
 echo "==> Fetching npm packages"
 
-cd "$NPM_DIR"
+docker image inspect "$BASE_IMAGE" > /dev/null 2>&1 || docker load -i "$IMAGE_TAR"
+
 while IFS= read -r spec; do
   pkg_name="${spec%@*}"
   pkg_ver="${spec##*@}"
-  tgz="$(echo "$pkg_name" | sed 's|^@||; s|/|-|g')-${pkg_ver}.tgz"
+  tgz="$NPM_DIR/$(echo "$pkg_name" | sed 's|^@||; s|/|-|g')-${pkg_ver}.tgz"
   if [ ! -f "$tgz" ]; then
     echo "  $spec"
-    npm pack "$spec" > /dev/null 2>&1 || echo "  ERROR: npm pack failed for $spec" >&2
+    CONTAINER=$(docker run -d "$BASE_IMAGE" sleep 600)
+    docker exec "$CONTAINER" npm install -g --prefix /opt/npm-global "$spec"
+    tmpdir=$(mktemp -d)
+    docker cp "$CONTAINER:/opt/npm-global" "$tmpdir/"
+    tar czf "$tgz" -C "$tmpdir" npm-global
+    rm -rf "$tmpdir"
+    docker rm -f "$CONTAINER"
   fi
 done < <(yq '.npm | to_entries[] | .key + "@" + .value' "$VERSIONS")
 
