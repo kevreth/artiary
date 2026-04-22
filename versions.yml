@@ -11,9 +11,6 @@ scripts:
   claude:
     version: "2.1.114"
     url: "https://downloads.claude.ai/claude-code-releases/${version}/linux-x64/claude"
-  # kimi:
-  #   version: "0.11.7"
-  #   url: "https://releases.astral.sh/github/uv/releases/download/${version}/uv-x86_64-unknown-linux-gnu.tar.gz"
   kimi:
     version: "1.37.0"
     build: "builders/kimi/build.sh"
@@ -22,9 +19,9 @@ scripts:
     version: "2.7.6"
     build: "builders/mistral/build.sh"
     artifact: "mistral-vibe-offline.tar.gz"
-  # copilot:
-  #   version: "1.0.0"
-  #   url: ""
+  copilot:
+    version: "1.0.34"
+    url: "https://github.com/github/copilot-cli/releases/download/v${version}/copilot-linux-x64.tar.gz"
 apt: # run `make freeze` to pin versions
   - bison=2:3.8.2+dfsg-1+b2
   - build-essential=12.12
