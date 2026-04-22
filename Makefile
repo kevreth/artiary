@@ -2,7 +2,7 @@ ARTIFACTS := artifacts
 MANIFEST := $(ARTIFACTS)/manifest/versions.yml
 NODE_TAR := $(ARTIFACTS)/images/node.tar
 
-.PHONY: fetch freeze thaw clean manifest test-kimi test-mistral
+.PHONY: fetch freeze thaw clean manifest test-kimi test-mistral export
 
 fetch:
 	bash ./artifacts.sh
@@ -30,3 +30,12 @@ test-kimi:
 
 test-mistral:
 	$(MAKE) -C builders/mistral test
+
+export:
+	@if [ -z "$(DEST)" ]; then \
+		echo "ERROR: DEST is required. Usage: make export DEST=../docker/artifacts"; \
+		exit 1; \
+	fi
+	@mkdir -p "$(DEST)"
+	@cp -r $(ARTIFACTS)/* "$(DEST)/"
+	@echo "Artifacts exported to $(DEST)"
