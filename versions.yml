@@ -11,6 +11,9 @@ scripts:
   claude:
     version: "2.1.114"
     url: "https://downloads.claude.ai/claude-code-releases/${version}/linux-x64/claude"
+  yarn:
+    version: "4.14.1"
+    url: "https://repo.yarnpkg.com/${version}/packages/yarnpkg-cli/bin/yarn.js"
   kimi:
     version: "1.37.0"
     build: "builders/kimi/build.sh"

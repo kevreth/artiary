@@ -14,7 +14,7 @@ rm "$BUNDLE_DIR/uv.tar.gz"
 
 "$BUNDLE_DIR/uv" python install 3.13
 "$BUNDLE_DIR/uv" venv --python 3.13 --seed "$BUNDLE_DIR/.build-venv"
-"$BUNDLE_DIR/.build-venv/bin/pip" download kimi-cli \
+"$BUNDLE_DIR/.build-venv/bin/pip" download kimi-cli setuptools wheel \
     --prefer-binary \
     -d "$BUNDLE_DIR/wheels"
 rm -rf "$BUNDLE_DIR/.build-venv"
