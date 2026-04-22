@@ -2,7 +2,7 @@ ARTIFACTS := artifacts
 MANIFEST := $(ARTIFACTS)/manifest/versions.yml
 NODE_TAR := $(ARTIFACTS)/images/node.tar
 
-.PHONY: fetch freeze thaw clean manifest test-mistral
+.PHONY: fetch freeze thaw clean manifest test-kimi test-mistral
 
 fetch:
 	bash ./artifacts.sh
@@ -24,6 +24,9 @@ thaw:
 
 clean:
 	rm -rf $(ARTIFACTS)
+
+test-kimi:
+	$(MAKE) -C builders/kimi test
 
 test-mistral:
 	$(MAKE) -C builders/mistral test
