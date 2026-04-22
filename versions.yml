@@ -6,7 +6,10 @@ npm:
   "@quasar/cli": "4.0.0"
   "@google/gemini-cli": "0.38.2"
   "opencode-ai": "1.14.19"
+  "@qwen-code/qwen-code": "0.15.0"
 yarn: "4.14.1"
+pip:
+  aider-install: "0.2.0"
 scripts:
   claude:
     version: "2.1.114"
@@ -25,6 +28,12 @@ scripts:
   copilot:
     version: "1.0.34"
     url: "https://github.com/github/copilot-cli/releases/download/v${version}/copilot-linux-x64.tar.gz"
+  factory-droid:
+    version: "0.106.0"
+    url: "https://downloads.factory.ai/factory-cli/releases/${version}/linux/x64/droid"
+  goose:
+    version: "1.31.1"
+    url: "https://github.com/aaif-goose/goose/releases/download/v${version}/goose-x86_64-unknown-linux-gnu.tar.gz"
 apt: # run `make freeze` to pin versions
   - bison=2:3.8.2+dfsg-1+b2
   - build-essential=12.12

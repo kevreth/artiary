@@ -38,6 +38,12 @@ while IFS= read -r pkg; do
   [ -n "$ver" ] && yq -i ".npm[\"${pkg}\"] = \"${ver}\"" "$VERSIONS" && echo "    ${pkg}@${ver}"
 done < <(yq '.npm | keys[]' "$VERSIONS")
 
+echo "==> Freezing pip versions..."
+while IFS= read -r pkg; do
+  ver=$(python3 -c "import json, urllib.request; print(json.load(urllib.request.urlopen('https://pypi.org/pypi/$pkg/json'))['info']['version'])" 2>/dev/null)
+  [ -n "$ver" ] && yq -i ".pip[\"${pkg}\"] = \"${ver}\"" "$VERSIONS" && echo "    ${pkg}==${ver}"
+done < <(yq '.pip // {} | keys[]' "$VERSIONS")
+
 sync_manifest
 
 echo "==> Done. versions.yml updated."
