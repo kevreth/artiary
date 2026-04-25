@@ -1,30 +1,28 @@
 image:
   node: "node:24-trixie@sha256:554a85065c0157a254a5a063ea2294f6e2822e6333c3de5eb2269e2d7c755665" # run `make freeze` to append digest
 npm:
+  'playwright':
   "@charmland/crush": "0.61.1"
+  "@google/gemini-cli": "0.38.2"
   "@openai/codex": "0.122.0"
   "@quasar/cli": "4.0.0"
-  "@google/gemini-cli": "0.38.2"
-  "opencode-ai": "1.14.19"
   "@qwen-code/qwen-code": "0.15.0"
+  "eslint":
+  "opencode-ai": "1.14.19"
+  "prettier":
+  "typescript":
 yarn: "4.14.1"
 pip:
-  aider-install: "0.2.0"
+  "black":
+  "flake8":
+  "mypy":
+  "playwright":
+  "pytest":
+  "ruff":
 scripts:
   claude:
     version: "2.1.114"
     url: "https://downloads.claude.ai/claude-code-releases/${version}/linux-x64/claude"
-  yarn:
-    version: "4.14.1"
-    url: "https://repo.yarnpkg.com/${version}/packages/yarnpkg-cli/bin/yarn.js"
-  kimi:
-    version: "1.37.0"
-    build: "builders/kimi/build.sh"
-    artifact: "kimi-cli-offline.tar.gz"
-  mistral:
-    version: "2.7.6"
-    build: "builders/mistral/build.sh"
-    artifact: "mistral-vibe-offline.tar.gz"
   copilot:
     version: "1.0.34"
     url: "https://github.com/github/copilot-cli/releases/download/v${version}/copilot-linux-x64.tar.gz"
@@ -34,13 +32,36 @@ scripts:
   goose:
     version: "1.31.1"
     url: "https://github.com/aaif-goose/goose/releases/download/v${version}/goose-x86_64-unknown-linux-gnu.tar.gz"
+  jq:
+    version: "1.8.1"
+    url: "https://github.com/jqlang/jq/releases/download/jq-${version}/jq-linux-amd64"
+  kimi:
+    version: "1.37.0"
+    build: "builders/kimi/build.sh"
+    artifact: "kimi-cli-offline.tar.gz"
+  mistral:
+    version: "2.7.6"
+    build: "builders/mistral/build.sh"
+    artifact: "mistral-vibe-offline.tar.gz"
+  yarn:
+    version: "4.14.1"
+    url: "https://repo.yarnpkg.com/${version}/packages/yarnpkg-cli/bin/yarn.js"
+  yq:
+    version: "4.53.2"
+    url: "https://github.com/mikefarah/yq/releases/download/v${version}/yq_linux_amd64"
 apt: # run `make freeze` to pin versions
+  - bat
   - bison=2:3.8.2+dfsg-1+b2
   - build-essential=12.12
   - ca-certificates=20250419
   - curl=8.14.1-2+deb13u2
   - dnsutils
+  - fd-find
+  - findutils
+  - fzf
+  - gh
   - git=1:2.47.3-0+deb13u1
+  - httpie
   - iputils-ping=3:20240905-3
   - libffi-dev=3.4.8-2
   - libncurses-dev=6.5+20250216-2
@@ -51,8 +72,13 @@ apt: # run `make freeze` to pin versions
   - openssh-client=1:10.0p1-7+deb13u1
   - python3=3.13.5-1
   - python3-pip=25.1.1+dfsg-1
+  - python3-pytest
   - python3-venv=3.13.5-1
+  - ripgrep
+  - sqlite3
   - sudo=1.9.16p2-3+deb13u1
+  - tmux
+  - tree
   - vim=2:9.1.1230-2
   - wget=1.25.0-2
   - xz-utils=5.8.1-1
