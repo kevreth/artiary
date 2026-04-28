@@ -11,23 +11,24 @@ sync_manifest() {
 }
 
 echo "==> Freezing image digest..."
-TAG=$(yq '.image.node' "$VERSIONS" | sed 's/@sha256:.*//')
+TAG=$(yq '.image.base' "$VERSIONS")
 DIGEST=$(docker inspect "$TAG" --format '{{index .RepoDigests 0}}' 2>/dev/null | sed 's/.*@//')
 if [ -n "$DIGEST" ]; then
-  yq -i ".image.node = \"${TAG}@${DIGEST}\"" "$VERSIONS"
-  echo "    node: ${TAG}@${DIGEST}"
+  yq -i ".image.version = \"${DIGEST}\"" "$VERSIONS"
+  echo "    version: ${DIGEST}"
 fi
 
 echo "==> Freezing APT versions..."
 PKGS=$(yq '.apt[] | sub("=.*"; "")' "$VERSIONS" | tr '\n' ' ')
 docker run --rm "$TAG" sh -c "apt-get update -qq 2>/dev/null && apt-cache show $PKGS" \
   | awk '/^Package:/{pkg=$2} /^Version:/{print pkg "=" $2}' \
+  | awk -F= '!seen[$1]++' \
   > /tmp/apt-freeze.txt
 
 while IFS= read -r entry; do
   pkg="${entry%%=*}"
   ver="${entry#*=}"
-  yq -i "(.apt[] | select(split(\"=\")[0] == \"${pkg}\")) = \"${pkg}=${ver}\"" "$VERSIONS"
+  yq -i "(.apt[] | select(split(\"=\")[0] | sub(\":.*\"; \"\") == \"${pkg}\")) |= sub(\"=.*$\"; \"\") + \"=${ver}\"" "$VERSIONS"
   echo "    ${pkg}=${ver}"
 done < /tmp/apt-freeze.txt
 rm -f /tmp/apt-freeze.txt

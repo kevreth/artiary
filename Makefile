@@ -1,8 +1,10 @@
 ARTIFACTS := artifacts
 MANIFEST := $(ARTIFACTS)/manifest/versions.yml
-NODE_TAR := $(ARTIFACTS)/images/node.tar
+_BASE_SLUG := $(shell yq '.image.base' versions.yml | tr ':' '-')
+_VER_SLUG  := $(shell yq '.image.version // ""' versions.yml | sed 's/^sha256://')
+NODE_TAR   := $(ARTIFACTS)/images/$(_BASE_SLUG)$(if $(_VER_SLUG),-$(_VER_SLUG),).tar
 
-.PHONY: fetch freeze thaw clean manifest test-kimi test-mistral export
+.PHONY: fetch freeze thaw clean manifest test-kimi test-mistral test-playwright export
 
 fetch:
 	bash ./artifacts.sh
@@ -18,7 +20,7 @@ freeze:
 	bash ./freeze.sh
 
 thaw:
-	yq -i '.image.node |= sub("@sha256:[a-f0-9]+", "")' versions.yml
+	yq -i 'del(.image.version)' versions.yml
 	yq -i '.apt[] |= sub("=.*", "")' versions.yml
 	$(MAKE) manifest
 
@@ -30,6 +32,9 @@ test-kimi:
 
 test-mistral:
 	$(MAKE) -C builders/mistral test
+
+test-playwright:
+	$(MAKE) -C builders/playwright test
 
 export:
 	@if [ -z "$(DEST)" ]; then \

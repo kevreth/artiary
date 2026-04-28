@@ -20,8 +20,10 @@ sync_manifest() {
 
 sync_manifest
 
-BASE_IMAGE=$(yq '.image.node' "$VERSIONS")
-IMAGE_TAR="$IMG_DIR/node.tar"
+BASE_IMG=$(yq '.image.base' "$VERSIONS" | tr -d '"')
+VER=$(yq '.image.version // ""' "$VERSIONS" | tr -d '"')
+BASE_IMAGE="${BASE_IMG}${VER:+@$VER}"
+IMAGE_TAR="$IMG_DIR/$(echo "$BASE_IMG" | tr ':' '-')${VER:+-${VER#sha256:}}.tar"
 
 # Check if Docker is available
 DOCKER_AVAILABLE=false
@@ -48,7 +50,7 @@ if [ ! -f "$IMAGE_TAR" ]; then
   fi
 fi
 
-mapfile -t APT_PACKAGES < <(yq '.apt[] | sub("=.*"; "")' "$VERSIONS")
+mapfile -t APT_PACKAGES < <(yq '.apt[] | sub("=.*"; "")' "$VERSIONS" | tr -d '"')
 
 echo "==> Fetching APT packages"
 
@@ -58,7 +60,7 @@ if [ "$SUDO_AVAILABLE" = true ]; then
   chmod 755 "$LISTS_DIR" "$LISTS_DIR/partial"
 
   # Derive the Debian release from the image name (e.g. node:24-trixie → trixie)
-  DISTRO=$(yq '.image.node' "$VERSIONS" | grep -oE 'trixie|bookworm|bullseye|buster|sid' | head -1)
+  DISTRO=$(yq '.image.base' "$VERSIONS" | tr -d '"' | grep -oE 'trixie|bookworm|bullseye|buster|sid' | head -1)
 
   SOURCES_LIST=$(mktemp)
   APT_CONF=$(mktemp)
@@ -95,9 +97,12 @@ EOF
   before=$(ls ./*.deb 2>/dev/null | wc -l)
   while read -r pkg; do
     base="${pkg%%:*}"
-    if ! ls "${base}"_*.deb &>/dev/null; then
-      apt-get -c "$APT_CONF" download "$pkg" 2>/dev/null || true
-    fi
+    avail_ver=$(apt-cache -c "$APT_CONF" show "$pkg" 2>/dev/null | \
+      awk 'BEGIN{v=""} /^Version:/{v=$2} /^Filename:/{print v; exit}')
+    [ -z "$avail_ver" ] && continue
+    deb_ver=$(echo "$avail_ver" | sed 's/:/%3a/g')
+    ls "${base}_${deb_ver}_"*.deb &>/dev/null && continue
+    apt-get -c "$APT_CONF" download "${pkg}=${avail_ver}" 2>/dev/null || true
   done < pkglist.txt
   after=$(ls ./*.deb 2>/dev/null | wc -l)
   new=$((after - before))
@@ -128,7 +133,7 @@ if [ "$DOCKER_AVAILABLE" = true ]; then
       rm -rf "$tmpdir"
       docker rm -f "$CONTAINER"
     fi
-  done < <(yq '.npm | to_entries[] | .key + "@" + .value' "$VERSIONS")
+  done < <(yq '.npm | to_entries[] | .key + "@" + .value' "$VERSIONS" | tr -d '"')
 elif command -v npm >/dev/null 2>&1; then
   echo "  Docker not available; using host npm as fallback"
   while IFS= read -r spec; do
@@ -142,7 +147,7 @@ elif command -v npm >/dev/null 2>&1; then
       tar czf "$tgz" -C "$tmpdir" npm-global
       rm -rf "$tmpdir"
     fi
-  done < <(yq '.npm | to_entries[] | .key + "@" + .value' "$VERSIONS")
+  done < <(yq '.npm | to_entries[] | .key + "@" + .value' "$VERSIONS" | tr -d '"')
 else
   echo "  WARNING: Docker and npm not available, skipping npm packages"
 fi
@@ -151,9 +156,11 @@ echo "==> Fetching pip packages"
 
 if command -v python3 >/dev/null 2>&1 && python3 -m pip --version >/dev/null 2>&1; then
   while IFS= read -r spec; do
-    echo "  $spec"
-    python3 -m pip download -d "$PIP_DIR" "$spec" 2>/dev/null || echo "  WARNING: failed to download $spec"
-  done < <(yq '.pip // {} | to_entries[] | .key + "==" + .value' "$VERSIONS")
+    before=$(ls "$PIP_DIR" | wc -l)
+    python3 -m pip download -d "$PIP_DIR" -q "$spec" >/dev/null 2>&1 || echo "  WARNING: failed to download $spec"
+    after=$(ls "$PIP_DIR" | wc -l)
+    [ "$after" -gt "$before" ] && echo "  $spec"
+  done < <(yq '.pip // {} | to_entries[] | .key + "==" + .value' "$VERSIONS" | tr -d '"')
 else
   echo "  WARNING: python3 or pip not available, skipping pip packages"
 fi
@@ -161,9 +168,9 @@ fi
 echo "==> Fetching scripts"
 
 while IFS= read -r name; do
-  version=$(yq ".scripts.${name}.version" "$VERSIONS")
-  url=$(yq ".scripts.${name}.url // \"\"" "$VERSIONS")
-  build=$(yq ".scripts.${name}.build // \"\"" "$VERSIONS")
+  version=$(yq ".scripts[\"${name}\"].version" "$VERSIONS" | tr -d '"')
+  url=$(yq ".scripts[\"${name}\"].url // \"\"" "$VERSIONS" | tr -d '"')
+  build=$(yq ".scripts[\"${name}\"].build // \"\"" "$VERSIONS" | tr -d '"')
 
   if [ -n "$url" ] && [ "$url" != "null" ]; then
     url=$(echo "$url" | sed "s/\${version}/${version}/g")
@@ -171,7 +178,7 @@ while IFS= read -r name; do
     [ -f "$out" ] || curl -fsSL -o "$out" "$url"
 
   elif [ -n "$build" ] && [ "$build" != "null" ]; then
-    artifact=$(yq ".scripts.${name}.artifact" "$VERSIONS")
+    artifact=$(yq ".scripts[\"${name}\"].artifact" "$VERSIONS" | tr -d '"')
     OUT_DIR="$ROOT/builders/$name"
     mkdir -p "$OUT_DIR"
     out="$OUT_DIR/$artifact"
@@ -181,7 +188,7 @@ while IFS= read -r name; do
       (cd "$BUILD_DIR" && OUTPUT_DIR="$OUT_DIR" bash "$(basename "$build")")
     fi
   fi
-done < <(yq '.scripts | keys[]' "$VERSIONS")
+done < <(yq '.scripts | keys[]' "$VERSIONS" | tr -d '"')
 
 sync_manifest
 
