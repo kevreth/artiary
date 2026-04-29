@@ -3,11 +3,11 @@ image:
   version: "sha256:135dc9a66aef366e09958c18dab705081d77fb31eccffe8c3865fac9d3e42a1d" # run `make freeze` to set; `make thaw` to clear
 npm:
   'playwright': 1.59.1
-  "@charmland/crush": "0.63.0"
-  "@google/gemini-cli": "0.39.1"
+  "@charmland/crush": "0.64.0"
+  "@google/gemini-cli": "0.40.0"
   "@openai/codex": "0.125.0"
   "@quasar/cli": "4.0.0"
-  "@qwen-code/qwen-code": "0.15.4"
+  "@qwen-code/qwen-code": "0.15.5"
   "eslint": 10.2.1
   "opencode-ai": "1.14.29"
   "prettier": 3.8.3
@@ -17,30 +17,30 @@ pip:
   "black": 26.3.1
   "flake8": 7.3.0
   "mypy": 1.20.2
-  "playwright": 1.58.0
+  "playwright": 1.59.0
   "pytest": 9.0.3
   "ruff": 0.15.12
 scripts:
   claude:
-    version: "2.1.119"
+    version: "2.1.123"
     url: "https://downloads.claude.ai/claude-code-releases/${version}/linux-x64/claude"
   gh:
-    version: "2.91.0"
+    version: "2.92.0"
     url: "https://github.com/cli/cli/releases/download/v${version}/gh_${version}_linux_amd64.tar.gz"
   copilot:
-    version: "1.0.36"
+    version: "1.0.39"
     url: "https://github.com/github/copilot-cli/releases/download/v${version}/copilot-linux-x64.tar.gz"
   factory-droid:
-    version: "0.106.0"
+    version: "0.112.0"
     url: "https://downloads.factory.ai/factory-cli/releases/${version}/linux/x64/droid"
   goose:
-    version: "1.32.0"
+    version: "1.33.1"
     url: "https://github.com/aaif-goose/goose/releases/download/v${version}/goose-x86_64-unknown-linux-gnu.tar.gz"
   jq:
     version: "1.8.1"
     url: "https://github.com/jqlang/jq/releases/download/jq-${version}/jq-linux-amd64"
   kimi:
-    version: "1.39.0"
+    version: "1.40.0"
     build: "builders/kimi/build.sh"
     artifact: "kimi-cli-offline.tar.gz"
   playwright-chromium:
@@ -48,7 +48,7 @@ scripts:
     build: "builders/playwright/build.sh"
     artifact: "playwright-chromium-offline.tar.gz"
   mistral:
-    version: "2.7.6"
+    version: "2.9.2"
     build: "builders/mistral/build.sh"
     artifact: "mistral-vibe-offline.tar.gz"
   yarn:

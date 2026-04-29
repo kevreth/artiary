@@ -89,7 +89,7 @@ try:
     from prompt_toolkit.layout import Layout, Window
     from prompt_toolkit.layout.controls import FormattedTextControl
     from prompt_toolkit.styles import Style
-    from prompt_toolkit.formatted_text import FormattedText
+    from prompt_toolkit.formatted_text import to_formatted_text, ANSI
     prompt_toolkit_available = True
 except ImportError:
     prompt_toolkit_available = False
@@ -444,58 +444,56 @@ def select_packages_interactive(outdated: list[tuple]) -> list[tuple]:
     selected_indices = set(range(len(outdated)))  # Start with all selected
     cursor_idx = 0
 
-    # Status bar text
-    status_text = "? Choose which packages to update ›\n  ↑/↓: Select a package\n  Space: Toggle selection\n  a: Toggle all\n  Enter: Upgrade\n"
+    # ANSI color codes (foreground only, no background)
+    GREEN = "\033[32m"
+    CYAN = "\033[36m"
+    MAGENTA = "\033[35m"
+    YELLOW = "\033[33m"
+    BOLD = "\033[1m"
+    RESET = "\033[0m"
 
     def get_formatted_text():
-        result = []
-        result.append(("class:status", status_text))
-        result.append(("", "\n"))
+        lines = [
+            "? Choose which packages to update ›",
+            "  ↑/↓: Select a package",
+            "  Space: Toggle selection",
+            "  a: Toggle all",
+            "  Enter: Upgrade",
+            ""
+        ]
 
         for i, (type_, name, current, latest) in enumerate(outdated):
             is_cursor = (i == cursor_idx)
             is_selected = i in selected_indices
 
-            # Build the line
-            cursor_mark = "❯ " if is_cursor else "  "
-            checkbox = ("class:selected", "◉ ") if is_selected else ("class:", "◯ ")
-            type_str = ("class:type", f"{type_:<6} ")
-            name_str = ("class:name", f"{name[:25]:<25} ")
-            current_str = ("class:current", f"{current:<10} ")
-            arrow = ("class:arrow", "→ ")
+            cursor_mark = f"{BOLD}❯{RESET} " if is_cursor else "  "
 
-            # Version diff highlighting
+            if is_selected:
+                checkbox = f"{GREEN}◉{RESET}"
+            else:
+                checkbox = "◯"
+
+            type_str = f"{CYAN}{type_:<6}{RESET} "
+            name_str = f"{MAGENTA}{name[:25]:<25}{RESET} "
+            current_str = f"{YELLOW}{current:<10}{RESET} "
+            arrow = "→ "
+
+            # Version diff highlighting (only changed parts in green)
             cur_parts = current.split(".")
             lat_parts = latest.split(".")
-            latest_parts = []
+            latest_display = ""
             for j in range(len(lat_parts)):
                 if j >= len(cur_parts) or lat_parts[j] != cur_parts[j]:
-                    latest_parts.append(("class:latest-changed", lat_parts[j]))
+                    latest_display += f"{GREEN}{lat_parts[j]}{RESET}"
                 else:
-                    latest_parts.append(("class:latest", lat_parts[j]))
+                    latest_display += lat_parts[j]
                 if j < len(lat_parts) - 1:
-                    latest_parts.append(("class:latest", "."))
+                    latest_display += "."
 
-            line_parts = [("class:cursor", cursor_mark), checkbox, type_str, name_str, current_str, arrow] + latest_parts
-            result.append(("class:line", ""))
-            result.extend(line_parts)
-            result.append(("", "\n"))
+            line = f"{cursor_mark}{checkbox} {type_str}{name_str}{current_str}{arrow}{latest_display}"
+            lines.append(line)
 
-        return result
-
-    # Style definitions
-    style = Style.from_dict({
-        "status": "#ansiwhite",
-        "selected": "fg:#00ff00 bold",
-        "type": "fg:cyan",
-        "name": "fg:magenta",
-        "current": "fg:yellow",
-        "arrow": "#ansiwhite",
-        "latest": "#ansiwhite",
-        "latest-changed": "fg:#00ff00",
-        "cursor": "bold",
-        "line": "",
-    })
+        return ANSI("\n".join(lines))
 
     # Key bindings
     kb = KeyBindings()
@@ -537,7 +535,7 @@ def select_packages_interactive(outdated: list[tuple]) -> list[tuple]:
     # Create and run the application
     control = FormattedTextControl(get_formatted_text)
     layout = Layout(Window(control))
-    app = Application(layout=layout, key_bindings=kb, style=style, full_screen=False)
+    app = Application(layout=layout, key_bindings=kb, full_screen=False)
     app.run()
 
     # Return selected packages
