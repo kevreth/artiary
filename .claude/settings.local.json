@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:code.kimi.com)",
+      "WebFetch(domain:cdn.kimi.com)",
+      "Bash(make fetch *)"
+    ]
+  }
+}
