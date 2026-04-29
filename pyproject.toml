@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "prompt-toolkit>=3.0.52",
     "requests>=2.33.1",
     "ruamel-yaml>=0.19.1",
 ]

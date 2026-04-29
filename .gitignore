@@ -2,3 +2,4 @@ artifacts/
 builders/*/build
 builders/*/*-offline/
 builders/*/*-offline.tar.gz
+__pycache__

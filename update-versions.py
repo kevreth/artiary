@@ -83,6 +83,17 @@ try:
 except ImportError:
     Console = Table = None
 
+try:
+    from prompt_toolkit import Application
+    from prompt_toolkit.key_binding import KeyBindings
+    from prompt_toolkit.layout import Layout, Window
+    from prompt_toolkit.layout.controls import FormattedTextControl
+    from prompt_toolkit.styles import Style
+    from prompt_toolkit.formatted_text import FormattedText
+    prompt_toolkit_available = True
+except ImportError:
+    prompt_toolkit_available = False
+
 # ─── Constants ───
 VERSIONS_FILE = Path(__file__).parent / "versions.yml"
 CACHE_DIR = Path("/tmp/artiary-update-cache")
@@ -319,11 +330,12 @@ def format_outdated(outdated: list[tuple]) -> str:
         return capture.get()
     else:
         lines = [
-            f"{'TYPE':<10} {'PACKAGE':<40} {'CURRENT':<20} {'LATEST':<20}",
-            "-" * 90
+            f"{'TYPE':<6} {'PACKAGE':<25} {'CURRENT':<10} {'LATEST':<20}",
+            "-" * 65
         ]
         for type_, name, current, latest in outdated:
-            lines.append(f"{type_:<10} {name:<40} {current:<20} {latest:<20}")
+            display_name = name[:25]
+            lines.append(f"{type_:<6} {display_name:<25} {current:<10} {latest:<20}")
         return "\n".join(lines)
 
 def update_versions(config: dict, to_update: list[tuple]) -> None:
@@ -352,41 +364,184 @@ def update_versions(config: dict, to_update: list[tuple]) -> None:
             yaml.dump(config, f, default_flow_style=False)
     print(f"\nUpdated {VERSIONS_FILE}")
 
+def highlight_version_diff(current: str, latest: str) -> str:
+    """Return latest version string with changed parts in green ANSI."""
+    GREEN = "\033[32m"
+    RESET = "\033[0m"
+
+    cur_parts = current.split(".")
+    lat_parts = latest.split(".")
+
+    result = []
+    for i in range(len(lat_parts)):
+        if i >= len(cur_parts) or lat_parts[i] != cur_parts[i]:
+            result.append(f"{GREEN}{lat_parts[i]}{RESET}")
+        else:
+            result.append(lat_parts[i])
+
+    return ".".join(result)
+
+
+def format_package_line(idx: int, type_: str, name: str, current: str, latest: str,
+                        selected: bool, is_cursor: bool) -> str:
+    """Format a single package line for the interactive UI."""
+    BOLD = "\033[1m"
+    CYAN = "\033[36m"
+    YELLOW = "\033[33m"
+    GREEN = "\033[32m"
+    RESET = "\033[0m"
+    GREEN_BG = "\033[42m"
+    WHITE = "\033[37m"
+
+    # Cursor indicator
+    cursor = "❯ " if is_cursor else "  "
+
+    # Checkbox: filled (selected) or empty
+    if selected:
+        checkbox = f"{GREEN}◉{RESET}"
+    else:
+        checkbox = "◯"
+
+    # Highlight version diff
+    highlighted_latest = highlight_version_diff(current, latest)
+
+    # Format: cursor + checkbox + type + name + current -> latest
+    # Truncate name to fit in terminal (assume ~80 cols)
+    display_name = name[:35] if len(name) > 35 else name
+    type_short = type_[:4]  # npm, pip, apt, script->scr, image->img
+
+    line = f"{cursor}{checkbox} {CYAN}{type_short}{RESET} {display_name:<35} {YELLOW}{current}{RESET} → {highlighted_latest}"
+    return line
+
+
 def select_packages_interactive(outdated: list[tuple]) -> list[tuple]:
-    """Interactive package selection with fallback to numbered menu."""
+    """Interactive package selection like npm-check-updates.
+
+    UI similar to:
+      ? Choose which packages to update ›
+        ↑/↓: Select a package
+        Space: Toggle selection
+        a: Toggle all
+        Enter: Upgrade
+
+      ❯ ◉ @types/tabulator-tables    6.3.1  →    6.3.2
+        ◉ astro                      6.1.7  →   6.1.10
+    """
     if not outdated:
         return []
 
-    if questionary:
-        choices = [
-            questionary.Choice(
-                title=f"{type_:<10} {name:<30} {current} -> {latest}",
-                value=(type_, name, current, latest)
-            )
-            for type_, name, current, latest in outdated
-        ]
-        selected = questionary.checkbox(
-            "Select packages to update (space to toggle, enter to confirm):",
-            choices=choices
-        ).ask()
-        return selected if selected else []
-    else:
-        # Fallback to stdin menu
-        print("\nSelect packages to update:")
-        for i, (type_, name, current, latest) in enumerate(outdated, 1):
-            print(f"  {i}) {type_}/{name}: {current} -> {latest}")
-        print("\nEnter numbers to update (comma-separated, e.g., 1,3,5 or 'all'):")
-        user_input = input("> ").strip()
-        if user_input.lower() == "all":
-            return outdated
-        selected = []
-        for num_str in user_input.split(","):
-            num_str = num_str.strip()
-            if num_str.isdigit():
-                num = int(num_str)
-                if 1 <= num <= len(outdated):
-                    selected.append(outdated[num-1])
-        return selected
+    # Check requirements: prompt_toolkit installed AND real terminal
+    if not prompt_toolkit_available:
+        print("Error: prompt_toolkit is required for interactive mode.", file=sys.stderr)
+        print("Install with: uv add prompt_toolkit", file=sys.stderr)
+        sys.exit(1)
+
+    if not sys.stdin.isatty():
+        print("Error: Interactive mode requires a real terminal.", file=sys.stderr)
+        print("Use -u flag to update all packages non-interactively.", file=sys.stderr)
+        sys.exit(1)
+
+    selected_indices = set(range(len(outdated)))  # Start with all selected
+    cursor_idx = 0
+
+    # Status bar text
+    status_text = "? Choose which packages to update ›\n  ↑/↓: Select a package\n  Space: Toggle selection\n  a: Toggle all\n  Enter: Upgrade\n"
+
+    def get_formatted_text():
+        result = []
+        result.append(("class:status", status_text))
+        result.append(("", "\n"))
+
+        for i, (type_, name, current, latest) in enumerate(outdated):
+            is_cursor = (i == cursor_idx)
+            is_selected = i in selected_indices
+
+            # Build the line
+            cursor_mark = "❯ " if is_cursor else "  "
+            checkbox = ("class:selected", "◉ ") if is_selected else ("class:", "◯ ")
+            type_str = ("class:type", f"{type_:<6} ")
+            name_str = ("class:name", f"{name[:25]:<25} ")
+            current_str = ("class:current", f"{current:<10} ")
+            arrow = ("class:arrow", "→ ")
+
+            # Version diff highlighting
+            cur_parts = current.split(".")
+            lat_parts = latest.split(".")
+            latest_parts = []
+            for j in range(len(lat_parts)):
+                if j >= len(cur_parts) or lat_parts[j] != cur_parts[j]:
+                    latest_parts.append(("class:latest-changed", lat_parts[j]))
+                else:
+                    latest_parts.append(("class:latest", lat_parts[j]))
+                if j < len(lat_parts) - 1:
+                    latest_parts.append(("class:latest", "."))
+
+            line_parts = [("class:cursor", cursor_mark), checkbox, type_str, name_str, current_str, arrow] + latest_parts
+            result.append(("class:line", ""))
+            result.extend(line_parts)
+            result.append(("", "\n"))
+
+        return result
+
+    # Style definitions
+    style = Style.from_dict({
+        "status": "#ansiwhite",
+        "selected": "fg:#00ff00 bold",
+        "type": "fg:cyan",
+        "name": "fg:magenta",
+        "current": "fg:yellow",
+        "arrow": "#ansiwhite",
+        "latest": "#ansiwhite",
+        "latest-changed": "fg:#00ff00",
+        "cursor": "bold",
+        "line": "",
+    })
+
+    # Key bindings
+    kb = KeyBindings()
+
+    @kb.add("up")
+    def _(event):
+        nonlocal cursor_idx
+        cursor_idx = (cursor_idx - 1) % len(outdated)
+
+    @kb.add("down")
+    def _(event):
+        nonlocal cursor_idx
+        cursor_idx = (cursor_idx + 1) % len(outdated)
+
+    @kb.add("space")
+    def _(event):
+        if cursor_idx in selected_indices:
+            selected_indices.discard(cursor_idx)
+        else:
+            selected_indices.add(cursor_idx)
+
+    @kb.add("a")
+    def _(event):
+        if len(selected_indices) == len(outdated):
+            selected_indices.clear()
+        else:
+            selected_indices.update(range(len(outdated)))
+
+    @kb.add("enter")
+    def _(event):
+        event.app.exit()
+
+    @kb.add("c-c")
+    @kb.add("q")
+    def _(event):
+        event.app.exit()
+        selected_indices.clear()
+
+    # Create and run the application
+    control = FormattedTextControl(get_formatted_text)
+    layout = Layout(Window(control))
+    app = Application(layout=layout, key_bindings=kb, style=style, full_screen=False)
+    app.run()
+
+    # Return selected packages
+    return [outdated[i] for i in sorted(selected_indices)]
 
 # ─── Main ───
 def main():
@@ -413,15 +568,16 @@ def main():
         print("All packages are up to date!")
         sys.exit(0)
 
-    print("\n" + format_outdated(outdated) + "\n")
-
     # Determine packages to update
     to_update = []
     if args.update_all:
+        print("\n" + format_outdated(outdated) + "\n")
         to_update = outdated
     elif args.interactive:
+        # Skip printing table - interactive UI shows packages directly
         to_update = select_packages_interactive(outdated)
     else:
+        print("\n" + format_outdated(outdated) + "\n")
         print("Run with -i for interactive selection or -u to update all.")
         sys.exit(0)
 
