@@ -50,6 +50,13 @@ if [ ! -f "$IMAGE_TAR" ]; then
   fi
 fi
 
+# Prune old image tarballs
+for f in "$IMG_DIR"/*.tar; do
+  [ -f "$f" ] || continue
+  [ "$f" = "$IMAGE_TAR" ] && continue
+  rm -f "$f"
+done
+
 mapfile -t APT_PACKAGES < <(yq '.apt[] | sub("=.*"; "")' "$VERSIONS" | tr -d '"')
 
 echo "==> Fetching APT packages"
@@ -109,6 +116,26 @@ EOF
   [ "$new" -gt 0 ] && echo "  Downloaded $new packages"
 
   rm -f "$APT_DIR/pkglist.txt"
+
+  # Prune old apt .deb files not in current dependency tree
+  keep_pkg_args=()
+  for pkg in "${APT_PACKAGES[@]}"; do
+    keep_pkg_args+=("$pkg")
+  done
+  if [ ${#keep_pkg_args[@]} -gt 0 ]; then
+    TMP_LIST=$(mktemp)
+    for pkg in "${keep_pkg_args[@]}"; do
+      apt-cache -c "$APT_CONF" depends --recurse --no-recommends --no-suggests \
+        --no-conflicts --no-breaks --no-replaces --no-enhances "$pkg" \
+        2>/dev/null | grep '^\w' | grep -v '^<'
+    done | sort -u > "$TMP_LIST"
+    for f in "$APT_DIR"/*.deb; do
+      [ -f "$f" ] || continue
+      base=$(dpkg-deb -f "$f" Package 2>/dev/null || echo "$f" | sed 's/_.*//')
+      grep -q "^${base}$" "$TMP_LIST" || rm -f "$f"
+    done
+    rm -f "$TMP_LIST"
+  fi
 else
   echo "  WARNING: sudo not available, skipping apt package fetch"
   echo "  (using existing cached packages in $APT_DIR)"
@@ -152,6 +179,20 @@ else
   echo "  WARNING: Docker and npm not available, skipping npm packages"
 fi
 
+# Prune old npm tarballs
+while IFS= read -r spec; do
+  pkg_name="${spec%@*}"
+  pkg_ver="${spec##*@}"
+  tgz="$NPM_DIR/$(echo "$pkg_name" | sed 's|^@||; s|/|-|g')-${pkg_ver}.tgz"
+  keep+=("$tgz")
+done < <(yq '.npm | to_entries[] | .key + "@" + .value' "$VERSIONS" | tr -d '"')
+for f in "$NPM_DIR"/*.tgz; do
+  [ -f "$f" ] || continue
+  found=false
+  for k in "${keep[@]}"; do [ "$f" = "$k" ] && { found=true; break; }; done
+  $found || rm -f "$f"
+done
+
 echo "==> Fetching pip packages"
 
 if command -v python3 >/dev/null 2>&1 && python3 -m pip --version >/dev/null 2>&1; then
@@ -164,6 +205,24 @@ if command -v python3 >/dev/null 2>&1 && python3 -m pip --version >/dev/null 2>&
 else
   echo "  WARNING: python3 or pip not available, skipping pip packages"
 fi
+
+# Prune old pip packages
+TMP_PIP=$(mktemp -d)
+pip_specs=()
+while IFS= read -r spec; do
+  pip_specs+=("$spec")
+done < <(yq '.pip // {} | to_entries[] | .key + "==" + .value' "$VERSIONS" | tr -d '"')
+if [ ${#pip_specs[@]} -gt 0 ]; then
+  for spec in "${pip_specs[@]}"; do
+    python3 -m pip download -d "$TMP_PIP" -q "$spec" >/dev/null 2>&1 || true
+  done
+  for f in "$PIP_DIR"/*; do
+    [ -f "$f" ] || continue
+    base_f=$(basename "$f")
+    [ -f "$TMP_PIP/$base_f" ] || rm -f "$f"
+  done
+fi
+rm -rf "$TMP_PIP"
 
 echo "==> Fetching scripts"
 
@@ -189,6 +248,36 @@ while IFS= read -r name; do
     fi
   fi
 done < <(yq '.scripts | keys[]' "$VERSIONS" | tr -d '"')
+
+# Prune old scripts
+keep_scr=()
+while IFS= read -r name; do
+  version=$(yq ".scripts[\"${name}\"].version" "$VERSIONS" | tr -d '"')
+  url=$(yq ".scripts[\"${name}\"].url // \"\"" "$VERSIONS" | tr -d '"')
+  build=$(yq ".scripts[\"${name}\"].build // \"\"" "$VERSIONS" | tr -d '"')
+  if [ -n "$url" ] && [ "$url" != "null" ]; then
+    keep_scr+=("$SCR_DIR/${name}-${version}")
+  elif [ -n "$build" ] && [ "$build" != "null" ]; then
+    artifact=$(yq ".scripts[\"${name}\"].artifact" "$VERSIONS" | tr -d '"')
+    keep_scr+=("$ROOT/builders/$name/$artifact")
+  fi
+done < <(yq '.scripts | keys[]' "$VERSIONS" | tr -d '"')
+for f in "$SCR_DIR"/*; do
+  [ -f "$f" ] || continue
+  found=false
+  for k in "${keep_scr[@]}"; do [ "$f" = "$k" ] && { found=true; break; }; done
+  $found || rm -f "$f"
+done
+for name in "$ROOT/builders"/*; do
+  [ -d "$name" ] || continue
+  bname=$(basename "$name")
+  artifact=$(yq ".scripts[\"${bname}\"].artifact // \"\"" "$VERSIONS" | tr -d '"')
+  for f in "$name"/*; do
+    [ -f "$f" ] || continue
+    [ -n "$artifact" ] && [ "$(basename "$f")" = "$artifact" ] && continue
+    rm -f "$f"
+  done
+done
 
 sync_manifest
 
