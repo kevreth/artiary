@@ -5,7 +5,7 @@ Artiary Update Versions Script - AI Reviewer Guide
 =================================================
 
 ## Context
-This Python script replaces the legacy bash-based `update-versions.sh` and deprecated `make freeze`/`make thaw` workflow for the Artiary artifact management system. Artiary uses `versions.yml` as the canonical manifest of all dependency versions (Docker images, NPM packages, PyPI packages, script binaries, APT packages). The prior bash implementation suffered from complex quoting issues, subshell variable scoping bugs, and painful JSON/API response parsing. This Python rewrite natively handles HTTP requests, JSON parsing, and YAML manipulation with cleaner error handling and maintainability.
+Artiary uses `versions.yml` as the canonical manifest of all dependency versions (Docker images, NPM packages, PyPI packages, script binaries, APT packages).
 
 ## Requirements
 1.  **Package Type Coverage**: Check all package categories defined in `versions.yml`:
