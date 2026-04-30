@@ -1,6 +1,6 @@
 ROOT      := $(realpath ../..)
-ARTIFACTS := $(ROOT)/artifacts
-VERSIONS  := $(ROOT)/versions.yml
+ARTIFACTS ?= $(HOME)/.cache/artiary/artifacts
+VERSIONS  ?= $(HOME)/.local/share/artiary/versions.yml
 BUNDLE    := mistral-vibe-offline
 
 .PHONY: test clean
@@ -11,7 +11,7 @@ test:
 	docker load -i $(ARTIFACTS)/images/node.tar
 	docker run --rm \
 	    -v "$(ARTIFACTS)/builders/mistral/$(BUNDLE).tar.gz:/tmp/bundle.tar.gz:ro" \
-	    $$(yq '.image.node' $(VERSIONS)) \
+	    $$(yq '.image.base' $(VERSIONS)) \
 	    bash -c 'apt-get update -qq && apt-get install -y -qq --no-install-recommends python3.13 && \
 	        cd /tmp && tar xzf bundle.tar.gz && \
 	        su node -s /bin/bash -c "cd /tmp && bash $(BUNDLE)/install.sh"'

@@ -4,8 +4,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OUT="${OUTPUT_DIR:-.}"
 BUNDLE_DIR="$OUT/playwright-chromium-offline"
-VERSIONS="$SCRIPT_DIR/../../versions.yml"
-BASE_IMAGE=$(yq '.image.node' "$VERSIONS")
+VERSIONS="${ARTIARY_VERSIONS:-${XDG_DATA_HOME:-$HOME/.local/share}/artiary/versions.yml}"
+BASE_IMAGE=$(yq '.image.base' "$VERSIONS")
 
 mkdir -p "$BUNDLE_DIR"
 

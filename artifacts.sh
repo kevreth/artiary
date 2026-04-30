@@ -2,7 +2,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-ROOT="$SCRIPT_DIR/artifacts"
+ROOT="${ARTIARY_ARTIFACTS:-${XDG_CACHE_HOME:-$HOME/.cache}/artiary/artifacts}"
 APT_DIR="$ROOT/apt"
 NPM_DIR="$ROOT/npm"
 PIP_DIR="$ROOT/pip"
@@ -13,10 +13,15 @@ MANIFEST_DIR="$ROOT/manifest"
 mkdir -p "$APT_DIR" "$NPM_DIR" "$PIP_DIR" "$IMG_DIR" "$SCR_DIR" "$MANIFEST_DIR"
 
 # Create local tmp dir for temp files
-TMP_DIR="$SCRIPT_DIR/tmp"
+TMP_DIR="${ARTIARY_TMP:-${XDG_CACHE_HOME:-$HOME/.cache}/artiary/tmp}"
 mkdir -p "$TMP_DIR" "$TMP_DIR/apt_cache"
 
-VERSIONS="$SCRIPT_DIR/versions.yml"
+VERSIONS="${ARTIARY_VERSIONS:-${XDG_DATA_HOME:-$HOME/.local/share}/artiary/versions.yml}"
+
+if [ ! -f "$VERSIONS" ]; then
+  echo "ERROR: $VERSIONS not found - run 'make resolve' first" >&2
+  exit 1
+fi
 
 sync_manifest() {
   cp "$VERSIONS" "$MANIFEST_DIR/versions.yml"

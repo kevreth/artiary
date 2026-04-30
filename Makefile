@@ -1,12 +1,19 @@
-ARTIFACTS := artifacts
+ARTIARY_DATA_DIR ?= $(HOME)/.local/share/artiary
+ARTIARY_VERSIONS ?= $(ARTIARY_DATA_DIR)/versions.yml
+ARTIARY_ARTIFACTS ?= $(HOME)/.cache/artiary/artifacts
 
-.PHONY: fetch clean update
+export ARTIARY_DATA_DIR ARTIARY_VERSIONS ARTIARY_ARTIFACTS
 
-fetch:
+.PHONY: resolve fetch clean update
+
+resolve:
+	uv run update-versions.py --resolve
+
+fetch: resolve
 	bash ./artifacts.sh
 
 update:
-	uv run update-versions.py -u
+	$(MAKE) resolve
 
 clean:
-	rm -rf $(ARTIFACTS)
+	rm -rf $(ARTIARY_ARTIFACTS)

@@ -1,162 +1,98 @@
 image:
   base: "node:24-trixie"
-  version: "sha256:135dc9a66aef366e09958c18dab705081d77fb31eccffe8c3865fac9d3e42a1d" # run `make freeze` to set; `make thaw` to clear
 npm:
-  'playwright': 1.59.1
-  "@charmland/crush": "0.64.0"
-  "@google/gemini-cli": "0.40.0"
-  "@openai/codex": "0.125.0"
-  "@quasar/cli": "4.0.0"
-  "@qwen-code/qwen-code": "0.15.5"
-  "eslint": 10.2.1
-  "opencode-ai": "1.14.29"
-  "prettier": 3.8.3
-  "typescript": 6.0.3
-  "@kilocode/cli": 7.2.31
+  - "playwright"
+  - "@charmland/crush"
+  - "@google/gemini-cli"
+  - "@openai/codex"
+  - "@quasar/cli"
+  - "@qwen-code/qwen-code"
+  - "eslint"
+  - "opencode-ai"
+  - "prettier"
+  - "typescript"
+  - "@kilocode/cli"
 pip:
-  "black": 26.3.1
-  "flake8": 7.3.0
-  "mypy": 1.20.2
-  "playwright": 1.59.0
-  "pytest": 9.0.3
-  "ruff": 0.15.12
+  - "black"
+  - "flake8"
+  - "mypy"
+  - "playwright"
+  - "pytest"
+  - "ruff"
 scripts:
   claude:
-    version: "2.1.123"
     url: "https://downloads.claude.ai/claude-code-releases/${version}/linux-x64/claude"
   gh:
-    version: "2.92.0"
     url: "https://github.com/cli/cli/releases/download/v${version}/gh_${version}_linux_amd64.tar.gz"
   copilot:
-    version: "1.0.39"
     url: "https://github.com/github/copilot-cli/releases/download/v${version}/copilot-linux-x64.tar.gz"
   factory-droid:
-    version: "0.112.0"
     url: "https://downloads.factory.ai/factory-cli/releases/${version}/linux/x64/droid"
   goose:
-    version: "1.33.1"
     url: "https://github.com/aaif-goose/goose/releases/download/v${version}/goose-x86_64-unknown-linux-gnu.tar.gz"
   jq:
-    version: "1.8.1"
     url: "https://github.com/jqlang/jq/releases/download/jq-${version}/jq-linux-amd64"
   kimi:
-    version: "1.40.0"
     build: "builders/kimi/build.sh"
     artifact: "kimi-cli-offline.tar.gz"
   playwright-chromium:
-    version: "latest" # matches npm playwright; run build to pin
     build: "builders/playwright/build.sh"
     artifact: "playwright-chromium-offline.tar.gz"
   mistral:
-    version: "2.9.2"
     build: "builders/mistral/build.sh"
     artifact: "mistral-vibe-offline.tar.gz"
   yarn:
-    version: "4.14.1"
     url: "https://repo.yarnpkg.com/${version}/packages/yarnpkg-cli/bin/yarn.js"
   yq:
-    version: "4.53.2"
     url: "https://github.com/mikefarah/yq/releases/download/v${version}/yq_linux_amd64"
-apt: # run `make freeze` to pin versions
-  - at-spi2-common=2.56.2-1+deb13u1
-  - bat=0.25.0-2+b2
-  - bison=2:3.8.2+dfsg-1+b2
-  - build-essential=12.12
-  - ca-certificates=20250419
-  - curl=8.14.1-2+deb13u2
-  - dnsutils
-  - fd-find=10.2.0-1+b5
-  - findutils=4.10.0-3
-  - fonts-freefont-ttf=20211204+svn4273-2
-  - fonts-ipafont-gothic=00303-23
-  - fonts-liberation=1:2.1.5-3
-  - fonts-noto-color-emoji=2.051-0+deb13u1
-  - fonts-tlwg-loma-otf=1:0.7.3-1
-  - fonts-unifont=1:15.1.01-1
-  - fonts-wqy-zenhei=0.9.45-8
-  - fzf=0.60.3-1+b2
-  - git=1:2.47.3-0+deb13u1
-  - httpie=3.2.4-3
-  - iputils-ping=3:20240905-3
-  - libasound2-data=1.2.14-1
-  - libasound2t64:amd64=1.2.14-1
-  - libatk-bridge2.0-0t64:amd64=2.56.2-1+deb13u1
-  - libatk1.0-0t64:amd64=2.56.2-1+deb13u1
-  - libatspi2.0-0t64:amd64=2.56.2-1+deb13u1
-  - libavahi-client3:amd64=0.8-16
-  - libavahi-common-data:amd64=0.8-16
-  - libavahi-common3:amd64=0.8-16
-  - libcups2t64:amd64=2.4.10-3+deb13u2
-  - libdbus-1-3:amd64=1.16.2-2
-  - libdrm-amdgpu1:amd64=2.4.124-2
-  - libdrm-common=2.4.124-2
-  - libdrm-intel1:amd64=2.4.124-2
-  - libdrm2:amd64=2.4.124-2
-  - libffi-dev=3.4.8-2
-  - libfontenc1:amd64=1:1.1.8-1+b2
-  - libgbm1:amd64=25.0.7-2
-  - libgl1-mesa-dri:amd64=25.0.7-2
-  - libgl1:amd64=1.7.0-1+b2
-  - libglvnd0:amd64=1.7.0-1+b2
-  - libglx-mesa0:amd64=25.0.7-2
-  - libglx0:amd64=1.7.0-1+b2
-  - libllvm19:amd64=1:19.1.7-3+b1
-  - libncurses-dev=6.5+20250216-2
-  - libnspr4:amd64=2:4.36-1
-  - libnss3:amd64=2:3.110-1+deb13u1
-  - libpciaccess0:amd64=0.17-3+b3
-  - libreadline-dev=8.2-6
-  - libsensors-config=1:3.6.2-2
-  - libsensors5:amd64=1:3.6.2-2
-  - libssl-dev=3.5.5-1~deb13u2
-  - libunwind8:amd64=1.8.1-0.1
-  - libvulkan1:amd64=1.4.309.0-1
-  - libwayland-server0:amd64=1.23.1-3
-  - libx11-xcb1:amd64=2:1.8.12-1
-  - libxaw7:amd64=2:1.0.16-1
-  - libxcb-dri3-0:amd64=1.17.0-2+b1
-  - libxcb-glx0:amd64=1.17.0-2+b1
-  - libxcb-present0:amd64=1.17.0-2+b1
-  - libxcb-randr0:amd64=1.17.0-2+b1
-  - libxcb-sync1:amd64=1.17.0-2+b1
-  - libxcb-xfixes0:amd64=1.17.0-2+b1
-  - libxcomposite1:amd64=1:0.4.6-1
-  - libxdamage1:amd64=1:1.1.6-1+b2
-  - libxfixes3:amd64=1:6.0.0-2+b4
-  - libxfont2:amd64=1:2.0.6-1+b3
-  - libxi6:amd64=2:1.8.2-1
-  - libxkbcommon0:amd64=1.7.0-2
-  - libxkbfile1:amd64=1:1.1.0-1+b4
-  - libxmu6:amd64=2:1.1.3-3+b4
-  - libxpm4:amd64=1:3.5.17-1+b3
-  - libxrandr2:amd64=2:1.5.4-1+b3
-  - libxshmfence1:amd64=1.3.3-1
-  - libxxf86vm1:amd64=1:1.1.4-1+b4
-  - libyaml-dev=0.2.5-2
-  - libz3-4:amd64=4.13.3-1
-  - links=2.29-2+b3
-  - links2=2.29-2+b3
-  - lynx=2.9.2-1
-  - makeself=2.5.0-1
-  - mesa-libgallium:amd64=25.0.7-2
-  - openssh-client=1:10.0p1-7+deb13u2
-  - python3-pip=25.1.1+dfsg-1
-  - python3-pytest=8.3.5-2
-  - python3-venv=3.13.5-1
-  - python3=3.13.5-1
-  - ripgrep=14.1.1-1+b4
-  - sqlite3=3.46.1-7+deb13u1
-  - sudo=1.9.16p2-3+deb13u1
-  - tmux=3.5a-3
-  - tree=2.2.1-1
-  - vim=2:9.1.1230-2
-  - wget=1.25.0-2
-  - x11-xkb-utils=7.7+9
-  - xfonts-encodings=1:1.0.4-2.2
-  - xfonts-scalable=1:1.0.3-1.3
-  - xfonts-utils=1:7.7+7
-  - xkb-data=2.42-1
-  - xserver-common=2:21.1.16-1.3+deb13u1
-  - xvfb=2:21.1.16-1.3+deb13u1
-  - xz-utils=5.8.1-1
-  - zlib1g-dev=1:1.3.dfsg+really1.3.1-1+b1
+apt:
+  - at-spi2-common
+  - bat
+  - bison
+  - build-essential
+  - ca-certificates
+  - curl
+  - bind9-dnsutils
+  - fd-find
+  - findutils
+  - fonts-freefont-ttf
+  - fonts-ipafont-gothic
+  - fonts-liberation
+  - fonts-noto-color-emoji
+  - fonts-tlwg-loma-otf
+  - fonts-unifont
+  - fonts-wqy-zenhei
+  - fzf
+  - git
+  - httpie
+  - iputils-ping
+  - libffi-dev
+  - libncurses-dev
+  - libreadline-dev
+  - libssl-dev
+  - libyaml-dev
+  - links
+  - links2
+  - lynx
+  - makeself
+  - openssh-client
+  - python3-pip
+  - python3-pytest
+  - python3-venv
+  - python3
+  - ripgrep
+  - sqlite3
+  - sudo
+  - tmux
+  - tree
+  - vim
+  - wget
+  - x11-xkb-utils
+  - xfonts-encodings
+  - xfonts-scalable
+  - xfonts-utils
+  - xkb-data
+  - xserver-common
+  - xvfb
+  - xz-utils
+  - zlib1g-dev
