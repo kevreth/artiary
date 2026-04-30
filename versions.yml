@@ -47,12 +47,17 @@ scripts:
     url: "https://github.com/mikefarah/yq/releases/download/v${version}/yq_linux_amd64"
 apt:
   - at-spi2-common
+  - bash
   - bat
+  - bind9-dnsutils
   - bison
   - build-essential
   - ca-certificates
+  - clang
+  - cmake
+  - coreutils
   - curl
-  - bind9-dnsutils
+  - default-mysql-client
   - fd-find
   - findutils
   - fonts-freefont-ttf
@@ -63,7 +68,9 @@ apt:
   - fonts-unifont
   - fonts-wqy-zenhei
   - fzf
+  - gdb
   - git
+  - grep
   - httpie
   - iputils-ping
   - libffi-dev
@@ -73,18 +80,26 @@ apt:
   - libyaml-dev
   - links
   - links2
+  - lld
   - lynx
+  - make
   - makeself
+  - ninja-build
   - openssh-client
+  - pkg-config
+  - postgresql-client
+  - python3
   - python3-pip
   - python3-pytest
   - python3-venv
-  - python3
+  - redis-tools
   - ripgrep
+  - sed
   - sqlite3
   - sudo
   - tmux
   - tree
+  - unzip
   - vim
   - wget
   - x11-xkb-utils
@@ -95,4 +110,5 @@ apt:
   - xserver-common
   - xvfb
   - xz-utils
+  - zip
   - zlib1g-dev
