@@ -252,14 +252,45 @@ def check_apt_packages(config: dict) -> list[tuple]:
     """Check APT packages for updates. Returns list of (type, name, current, latest)."""
     updates = []
     apt_cfg = config.get("apt", {})
-    if not isinstance(apt_cfg, dict):
+
+    # Determine distro and arch
+    distro = None
+    arch = "amd64"
+
+    # Parse packages based on apt config format (dict or list)
+    packages_to_check = {}  # lookup_name -> (original_name, version)
+
+    if isinstance(apt_cfg, dict):
+        distro = apt_cfg.get("distro", None)
+        arch = apt_cfg.get("architecture", "amd64")
+        for pkg, ver in apt_cfg.items():
+            if pkg in ("distro", "architecture"):
+                continue
+            lookup_name = pkg.split(':')[0]
+            packages_to_check[lookup_name] = (pkg, ver)
+    elif isinstance(apt_cfg, list):
+        # List format: "pkg=version" or "pkg"
+        for entry in apt_cfg:
+            if '=' in entry:
+                pkg, ver = entry.split('=', 1)
+                lookup_name = pkg.split(':')[0]
+                packages_to_check[lookup_name] = (pkg, ver)
+            # Entries without version are skipped (nothing to compare)
+    else:
         return updates
 
-    distro = apt_cfg.get("distro", "bullseye")
-    arch = apt_cfg.get("architecture", "amd64")
-    packages_to_check = {k: v for k, v in apt_cfg.items() if k not in ("distro", "architecture")}
     if not packages_to_check:
         return updates
+
+    # Derive distro from image base if not specified
+    if distro is None:
+        image_base = config.get("image", {}).get("base", "")
+        for d in ["trixie", "bookworm", "bullseye", "buster", "sid"]:
+            if d in image_base:
+                distro = d
+                break
+        if distro is None:
+            distro = "bullseye"
 
     url = f"http://ftp.debian.org/debian/dists/{distro}/main/binary-{arch}/Packages.xz"
     print(f"Checking APT packages (distro: {distro}, arch: {arch})...", file=sys.stderr)
@@ -286,10 +317,10 @@ def check_apt_packages(config: dict) -> list[tuple]:
                 pkg_versions[current_pkg] = line.split(":")[1].strip()
 
         # Compare versions
-        for pkg, current in packages_to_check.items():
-            latest = pkg_versions.get(pkg)
+        for lookup_name, (original_name, current) in packages_to_check.items():
+            latest = pkg_versions.get(lookup_name)
             if latest and latest != current:
-                updates.append(("apt", pkg, current, latest))
+                updates.append(("apt", original_name, current, latest))
     except Exception as e:
         print(f"Warning: APT check failed: {e}", file=sys.stderr)
     return updates
@@ -353,7 +384,14 @@ def update_versions(config: dict, to_update: list[tuple]) -> None:
             else:
                 config["scripts"][name] = latest
         elif type_ == "apt":
-            config["apt"][name] = latest
+            # Handle both dict and list formats for apt
+            if isinstance(config["apt"], dict):
+                config["apt"][name] = latest
+            elif isinstance(config["apt"], list):
+                for i, entry in enumerate(config["apt"]):
+                    if entry.startswith(name + "=") or entry == name:
+                        config["apt"][i] = f"{name}={latest}"
+                        break
         print(f"Updated {type_}/{name}: {current} -> {latest}")
 
     # Write back to versions.yml
