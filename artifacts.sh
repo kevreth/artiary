@@ -227,6 +227,20 @@ if [ ${#pip_specs[@]} -gt 0 ]; then
 fi
 rm -rf "$TMP_PIP"
 
+url_ext() {
+  local f
+  f=$(basename "$1")
+  case "$f" in
+    *.tar.gz)  echo ".tar.gz"  ;;
+    *.tar.zst) echo ".tar.zst" ;;
+    *.tar.xz)  echo ".tar.xz"  ;;
+    *.tar.bz2) echo ".tar.bz2" ;;
+    *.tgz)     echo ".tgz"     ;;
+    *.zip)     echo ".zip"     ;;
+    *)         echo ""         ;;
+  esac
+}
+
 echo "==> Fetching scripts"
 
 while IFS= read -r name; do
@@ -236,7 +250,7 @@ while IFS= read -r name; do
 
   if [ -n "$url" ] && [ "$url" != "null" ]; then
     url=$(echo "$url" | sed "s/\${version}/${version}/g")
-    out="$SCR_DIR/${name}-${version}"
+    out="$SCR_DIR/${name}-${version}$(url_ext "$url")"
     [ -f "$out" ] || curl -fsSL -o "$out" "$url"
   elif [ -n "$build" ] && [ "$build" != "null" ]; then
     artifact=$(yq ".scripts[\"${name}\"].artifact" "$VERSIONS" | tr -d '"')
@@ -258,7 +272,8 @@ while IFS= read -r name; do
   url=$(yq ".scripts[\"${name}\"].url // \"\"" "$VERSIONS" | tr -d '"')
   build=$(yq ".scripts[\"${name}\"].build // \"\"" "$VERSIONS" | tr -d '"')
   if [ -n "$url" ] && [ "$url" != "null" ]; then
-    keep_scr+=("$SCR_DIR/${name}-${version}")
+    url_resolved=$(echo "$url" | sed "s/\${version}/${version}/g")
+    keep_scr+=("$SCR_DIR/${name}-${version}$(url_ext "$url_resolved")")
   elif [ -n "$build" ] && [ "$build" != "null" ]; then
     artifact=$(yq ".scripts[\"${name}\"].artifact // \"\"" "$VERSIONS" | tr -d '"')
     keep_scr+=("$ROOT/builders/$name/$artifact")

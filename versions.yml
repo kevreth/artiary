@@ -9,6 +9,7 @@ npm:
   - "@qwen-code/qwen-code"
   - "eslint"
   - "opencode-ai"
+  - "opencode-linux-x64"
   - "prettier"
   - "typescript"
   - "@kilocode/cli"
@@ -16,6 +17,7 @@ pip:
   - "black"
   - "flake8"
   - "mypy"
+  - "pexpect"
   - "playwright"
   - "pytest"
   - "ruff"
@@ -35,6 +37,8 @@ scripts:
   kimi:
     build: "builders/kimi/build.sh"
     artifact: "kimi-cli-offline.tar.gz"
+  mise:
+    url: "https://mise.en.dev/v${version}/mise-v${version}-linux-x64.tar.zst"
   playwright-chromium:
     build: "builders/playwright/build.sh"
     artifact: "playwright-chromium-offline.tar.gz"
@@ -112,3 +116,4 @@ apt:
   - xz-utils
   - zip
   - zlib1g-dev
+  - zstd

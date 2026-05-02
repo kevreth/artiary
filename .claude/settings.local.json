@@ -3,7 +3,8 @@
     "allow": [
       "WebFetch(domain:code.kimi.com)",
       "WebFetch(domain:cdn.kimi.com)",
-      "Bash(make fetch *)"
+      "Bash(make fetch *)",
+      "Bash(curl -fsSL https://mise.run)"
     ]
   }
 }
