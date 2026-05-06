@@ -256,11 +256,16 @@ while IFS= read -r name; do
     artifact=$(yq ".scripts[\"${name}\"].artifact" "$VERSIONS" | tr -d '"')
     OUT_DIR="$ROOT/builders/$name"
     mkdir -p "$OUT_DIR"
-    out="$OUT_DIR/$artifact"
+    if [ -n "$version" ] && [ "$version" != "null" ]; then
+      ext=$(url_ext "$artifact")
+      out="$OUT_DIR/${artifact%$ext}-${version}${ext}"
+    else
+      out="$OUT_DIR/$artifact"
+    fi
     if [ ! -f "$out" ]; then
       echo "  $name"
       BUILD_DIR="$SCRIPT_DIR/$(dirname "$build")"
-      (cd "$BUILD_DIR" && OUTPUT_DIR="$OUT_DIR" bash "$(basename "$build")")
+      (cd "$BUILD_DIR" && OUTPUT_DIR="$OUT_DIR" VERSION="$version" ARTIFACT="$(basename "$out")" bash "$(basename "$build")")
     fi
   fi
 done < <(yq '.scripts | keys[]' "$VERSIONS" | tr -d '"')
@@ -289,9 +294,16 @@ for name in "$ROOT/builders"/*; do
   [ -d "$name" ] || continue
   bname=$(basename "$name")
   artifact=$(yq ".scripts[\"${bname}\"].artifact // \"\"" "$VERSIONS" | tr -d '"')
+  bver=$(yq ".scripts[\"${bname}\"].version // \"\"" "$VERSIONS" | tr -d '"')
+  if [ -n "$bver" ] && [ "$bver" != "null" ] && [ -n "$artifact" ]; then
+    ext=$(url_ext "$artifact")
+    keep_artifact="${artifact%$ext}-${bver}${ext}"
+  else
+    keep_artifact="$artifact"
+  fi
   for f in "$name"/*; do
     [ -f "$f" ] || continue
-    [ -n "$artifact" ] && [ "$(basename "$f")" = "$artifact" ] && continue
+    [ -n "$keep_artifact" ] && [ "$(basename "$f")" = "$keep_artifact" ] && continue
     rm -f "$f"
   done
 done

@@ -43,6 +43,6 @@ echo "  playwright version: $PW_VERSION"
 cp "$SCRIPT_DIR/install.sh" "$BUNDLE_DIR/"
 chmod +x "$BUNDLE_DIR/install.sh"
 
-tar czf "$OUT/playwright-chromium-offline.tar.gz" -C "$OUT" playwright-chromium-offline
+tar czf "$OUT/${ARTIFACT:-playwright-chromium-offline.tar.gz}" -C "$OUT" playwright-chromium-offline
 rm -rf "$BUNDLE_DIR"
-echo "==> Built playwright-chromium-offline.tar.gz"
+echo "==> Built ${ARTIFACT:-playwright-chromium-offline.tar.gz}"

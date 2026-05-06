@@ -14,7 +14,7 @@ rm "$BUNDLE_DIR/uv.tar.gz"
 
 "$BUNDLE_DIR/uv" python install 3.13
 "$BUNDLE_DIR/uv" venv --python 3.13 --seed "$BUNDLE_DIR/.build-venv"
-"$BUNDLE_DIR/.build-venv/bin/pip" download kimi-cli setuptools wheel \
+"$BUNDLE_DIR/.build-venv/bin/pip" download "kimi-cli==${VERSION}" setuptools wheel \
     --prefer-binary \
     -d "$BUNDLE_DIR/wheels"
 rm -rf "$BUNDLE_DIR/.build-venv"
@@ -22,4 +22,4 @@ rm -rf "$BUNDLE_DIR/.build-venv"
 cp install.sh "$BUNDLE_DIR/"
 chmod +x "$BUNDLE_DIR/install.sh"
 
-tar czf "$OUT/kimi-cli-offline.tar.gz" -C "$OUT" kimi-cli-offline
+tar czf "$OUT/${ARTIFACT:-kimi-cli-offline.tar.gz}" -C "$OUT" kimi-cli-offline

@@ -28,4 +28,5 @@ cp "$BUNDLE_DIR/wheels"/mistral_vibe-*.whl "$BUNDLE_DIR/mistral-vibe.whl" 2>/dev
 cp install.sh "$BUNDLE_DIR/"
 chmod +x "$BUNDLE_DIR/install.sh"
 
-tar czf "$OUT/mistral-vibe-offline.tar.gz" -C "$OUT" mistral-vibe-offline
+tar czf "$OUT/${ARTIFACT:-mistral-vibe-offline.tar.gz}" -C "$OUT" mistral-vibe-offline
+rm -rf "$BUNDLE_DIR"
