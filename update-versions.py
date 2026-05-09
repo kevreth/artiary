@@ -402,6 +402,12 @@ def check_apt_packages(config: dict) -> list[tuple]:
         print(f"Warning: APT check failed: {e}", file=sys.stderr)
     return updates
 
+def _dpkg_version_gt(v1: str, v2: str) -> bool:
+    """Return True if v1 is strictly greater than v2 per dpkg version ordering."""
+    import subprocess
+    return subprocess.run(["dpkg", "--compare-versions", v1, "gt", v2],
+                          capture_output=True).returncode == 0
+
 def fetch_debian_package_metadata(config: dict) -> tuple[dict[str, str], dict[str, list[str]]]:
     """Fetch Debian package versions and Provides mappings for the distro implied by image.base."""
     distro = None
@@ -449,7 +455,11 @@ def fetch_debian_package_metadata(config: dict) -> tuple[dict[str, str], dict[st
                 if line.startswith("Package:"):
                     current_pkg = line.split(":", 1)[1].strip()
                 elif line.startswith("Version:") and current_pkg:
-                    versions[current_pkg] = line.split(":", 1)[1].strip()
+                    new_ver = line.split(":", 1)[1].strip()
+                    existing = versions.get(current_pkg)
+                    # Keep the highest version across all suites (security repos can lag main).
+                    if existing is None or _dpkg_version_gt(new_ver, existing):
+                        versions[current_pkg] = new_ver
                 elif line.startswith("Provides:") and current_pkg:
                     for provided in line.split(":", 1)[1].split(","):
                         alias = provided.strip().split(" ", 1)[0]
@@ -486,7 +496,12 @@ def resolve_apt_packages(config: dict) -> tuple[list[str], list[str]]:
     resolved = []
     unresolved = []
     for entry in package_entries:
-        name = str(entry).split("=", 1)[0]
+        entry_str = str(entry)
+        # Locked entries (pkg=version) are preserved as-is, not re-resolved to latest.
+        if "=" in entry_str:
+            resolved.append(entry_str)
+            continue
+        name = entry_str
         lookup_name = name.split(":", 1)[0]
         latest = debian_versions.get(lookup_name)
         if latest:

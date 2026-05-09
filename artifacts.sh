@@ -96,12 +96,29 @@ apt-get -c "$APT_CONF" update -qq 2>/dev/null
   done
 } | sort -u > "$APT_DIR/pkglist.txt"
 
+# Build a lookup of manifest-pinned versions (pkg -> version).
+# Packages listed as "pkg=version" in the manifest are locked; we download
+# exactly that version rather than whatever apt-cache currently shows.
+declare -A PINNED_APT_VERSIONS
+while IFS= read -r entry; do
+  entry="${entry//\"/}"
+  if [[ "$entry" == *"="* ]]; then
+    pkg_key="${entry%%=*}"
+    pkg_key="${pkg_key%%:*}"  # strip arch qualifier
+    PINNED_APT_VERSIONS["$pkg_key"]="${entry#*=}"
+  fi
+done < <(yq '.apt[]' "$VERSIONS" 2>/dev/null)
+
 cd "$APT_DIR"
 before=$(ls ./*.deb 2>/dev/null | wc -l)
 while read -r pkg; do
   base="${pkg%%:*}"
-  avail_ver=$(apt-cache -c "$APT_CONF" show "$pkg" 2>/dev/null | \
-    awk 'BEGIN{v=""} /^Version:/{v=$2} /^Filename:/{print v; exit}')
+  if [[ -n "${PINNED_APT_VERSIONS[$base]}" ]]; then
+    avail_ver="${PINNED_APT_VERSIONS[$base]}"
+  else
+    avail_ver=$(apt-cache -c "$APT_CONF" show "$pkg" 2>/dev/null | \
+      awk 'BEGIN{v=""} /^Version:/{v=$2} /^Filename:/{print v; exit}')
+  fi
   [ -z "$avail_ver" ] && continue
   deb_ver="$avail_ver"
   # Check for existing .deb (use : not %3a for Docker compatibility)
