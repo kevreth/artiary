@@ -288,6 +288,9 @@ def check_script_packages(config: dict) -> list[tuple]:
                 resp = requests.get("https://mise.run", timeout=10)
                 match = re.search(r'current_version="v([^"]+)"', resp.text)
                 latest = match.group(1) if match else None
+            elif script == "quarto":
+                resp = requests.get("https://api.github.com/repos/quarto-dev/quarto-cli/releases/latest", timeout=10)
+                latest = resp.json().get("tag_name", "").lstrip("v")
             else:
                 print(f"Warning: No check method for script {script}", file=sys.stderr)
                 continue
@@ -339,6 +342,9 @@ def resolve_script_version(script: str, info: dict | str) -> str | None:
             return match.group(1) if match else current
         if script == "playwright-chromium":
             return current or "latest"
+        if script == "quarto":
+            resp = fetch_response("https://api.github.com/repos/quarto-dev/quarto-cli/releases/latest")
+            return resp.json().get("tag_name", "").lstrip("v")
         print(f"Warning: No resolve method for script {script}", file=sys.stderr)
     except Exception as e:
         print(f"Warning: Script resolve failed for {script}: {e}", file=sys.stderr)

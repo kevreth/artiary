@@ -42,6 +42,8 @@ scripts:
   playwright-chromium:
     build: "builders/playwright/build.sh"
     artifact: "playwright-chromium-offline.tar.gz"
+  quarto:
+    url: "https://github.com/quarto-dev/quarto-cli/releases/download/v${version}/quarto-${version}-linux-amd64.deb"
   mistral:
     build: "builders/mistral/build.sh"
     artifact: "mistral-vibe-offline.tar.gz"
