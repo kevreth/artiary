@@ -57,6 +57,7 @@ apt:
   - bat
   - bind9-dnsutils
   - bison
+  - bpftrace
   - build-essential
   - ca-certificates
   - clang
@@ -64,7 +65,9 @@ apt:
   - coreutils
   - curl
   - default-mysql-client
+  - entr
   - fd-find
+  - file
   - findutils
   - fonts-freefont-ttf
   - fonts-ipafont-gothic
@@ -77,7 +80,10 @@ apt:
   - gdb
   - git
   - grep
+  - htop
   - httpie
+  - inotify-tools
+  - iproute2
   - iputils-ping
   - libasound2t64
   - libatk-bridge2.0-0t64
@@ -113,25 +119,46 @@ apt:
   - links
   - links2
   - lld
+  - lsof
+  - ltrace
   - lynx
   - make
   - makeself
+  - man-db
+  - manpages-dev
+  - moreutils
+  - ncdu
+  - net-tools
+  - netcat-openbsd
   - ninja-build
+  - nmap
   - openssh-client
+  - parallel
+  - patch
   - pkg-config
   - postgresql-client
+  - procps
+  - psmisc
+  - pv
   - python3
   - python3-pip
   - python3-pytest
   - python3-venv
   - redis-tools
   - ripgrep
+  - rsync
   - sed
+  - shellcheck
+  - socat
   - sqlite3
+  - strace
   - sudo
+  - systemtap
+  - tcpdump
   - tmux
   - tree
   - unzip
+  - valgrind
   - vim
   - wget
   - x11-xkb-utils
