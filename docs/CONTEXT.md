@@ -1,3 +1,7 @@
+---
+title: "Artiary"
+---
+
 # Artiary
 
 > **Docs Convention**: Read `docs/PROTOCOL.md` if you haven't already in this session.
