@@ -37,6 +37,9 @@ scripts:
   kimi:
     build: "builders/kimi/build.sh"
     artifact: "kimi-cli-offline.tar.gz"
+  kiro:
+    build: "builders/kiro/build.sh"
+    artifact: "kiro-cli-offline.tar.xz"
   mise:
     url: "https://mise.en.dev/v${version}/mise-v${version}-linux-x64.tar.zst"
   playwright-chromium:

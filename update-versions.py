@@ -278,6 +278,9 @@ def check_script_packages(config: dict) -> list[tuple]:
             elif script == "kimi":
                 resp = requests.get("https://pypi.org/pypi/kimi-cli/json", timeout=10)
                 latest = resp.json().get("info", {}).get("version")
+            elif script == "kiro":
+                resp = requests.get("https://prod.download.cli.kiro.dev/stable/latest/manifest.json", timeout=10)
+                latest = resp.json().get("version")
             elif script == "mistral":
                 resp = requests.get("https://pypi.org/pypi/mistral-vibe/json", timeout=10)
                 latest = resp.json().get("info", {}).get("version")
@@ -330,6 +333,9 @@ def resolve_script_version(script: str, info: dict | str) -> str | None:
         if script == "kimi":
             resp = fetch_response("https://pypi.org/pypi/kimi-cli/json")
             return resp.json().get("info", {}).get("version")
+        if script == "kiro":
+            resp = fetch_response("https://prod.download.cli.kiro.dev/stable/latest/manifest.json")
+            return resp.json().get("version")
         if script == "mistral":
             resp = fetch_response("https://pypi.org/pypi/mistral-vibe/json")
             return resp.json().get("info", {}).get("version")
