@@ -4,7 +4,17 @@ ARTIARY_ARTIFACTS ?= $(HOME)/.cache/artiary/artifacts
 
 export ARTIARY_DATA_DIR ARTIARY_VERSIONS ARTIARY_ARTIFACTS
 
-.PHONY: resolve fetch clean update
+SRC_DIR   := .
+TESTS_DIR := tests
+QUALITY_MK := /workspace/dashboard/tools/quality.mk
+CHECKS_MK  := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))tools/checks.mk
+TOOL_CONFIG := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))tools/pyproject-tool-config.toml
+SEEDS_FILE := /workspace/autonomous-capital/harness/seeds/internal/repos.txt
+SERVE_DEFINED := 0
+include $(QUALITY_MK)
+include $(CHECKS_MK)
+
+.PHONY: resolve fetch clean update init
 
 resolve:
 	uv run update-versions.py --resolve
@@ -17,3 +27,6 @@ update:
 
 clean:
 	rm -rf $(ARTIARY_ARTIFACTS)
+
+init: ## Register project in harness seeds file
+	grep -qxF "$(CURDIR)" $(SEEDS_FILE) || echo "$(CURDIR)" >> $(SEEDS_FILE)
