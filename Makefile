@@ -14,7 +14,7 @@ SERVE_DEFINED := 0
 include $(QUALITY_MK)
 include $(CHECKS_MK)
 
-.PHONY: resolve fetch clean update init
+.PHONY: resolve fetch clean update init test
 
 resolve:
 	uv run update-versions.py --resolve
@@ -30,3 +30,6 @@ clean:
 
 init: ## Register project in harness seeds file
 	grep -qxF "$(CURDIR)" $(SEEDS_FILE) || echo "$(CURDIR)" >> $(SEEDS_FILE)
+
+test: ## Run test suite
+	uv run pytest $(TESTS_DIR) -v
