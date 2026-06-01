@@ -9,3 +9,21 @@ dependencies = [
     "requests>=2.33.1",
     "ruamel-yaml>=0.19.1",
 ]
+
+[tool.ruff]
+line-length = 160
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.mypy]
+python_version = "3.13"
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.coverage.report]
+fail_under = 0

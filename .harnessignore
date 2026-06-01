@@ -1,0 +1,28 @@
+# Harness ignore — files excluded from overnight AI analysis.
+# Glob patterns matched against filename or full path.
+
+# Generated and compiled
+*.pyc
+__pycache__/
+.venv/
+node_modules/
+dist/
+build/
+
+# AI / analysis tooling artifacts
+.acis/
+.codegraph/
+
+# Coverage and test artifacts
+.coverage
+coverage/
+htmlcov/
+reports/
+
+# Editor
+.vscode/
+.idea/
+
+# Lock files
+*.lock
+package-lock.json
