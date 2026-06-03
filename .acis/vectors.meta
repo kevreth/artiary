@@ -1,0 +1,8 @@
+{
+  "files": [
+    "tests/test_smoke.py",
+    "update-versions.py"
+  ],
+  "dim": 1024,
+  "count": 2
+}

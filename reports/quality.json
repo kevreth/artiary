@@ -1,0 +1,68 @@
+{
+  "generated": "2026-06-03T09:12:44.237415+00:00",
+  "stack": "python",
+  "checks": {
+    "lint": {
+      "tool": "ruff",
+      "status": "pass",
+      "violations": 0,
+      "report": "reports/ruff.json"
+    },
+    "typecheck": {
+      "tool": "mypy",
+      "status": "pass",
+      "errors": 0,
+      "warnings": 0,
+      "report": "reports/mypy.json"
+    },
+    "test": {
+      "tool": "pytest",
+      "status": "pass",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "total": 1,
+      "duration_s": 0.11,
+      "report": "reports/pytest.json"
+    },
+    "coverage": {
+      "tool": "pytest-cov",
+      "status": "pass",
+      "line_pct": 1.0,
+      "branch_pct": null,
+      "threshold": 0,
+      "report": "reports/coverage.json"
+    },
+    "complexity": {
+      "tool": "radon",
+      "status": "pass",
+      "worst_rank": "A",
+      "violations": 0,
+      "report": "reports/complexity.json"
+    },
+    "deps": {
+      "tool": "pip-audit",
+      "status": "pass",
+      "vulnerabilities": 0,
+      "critical": null,
+      "high": null,
+      "report": "reports/pip-audit.json"
+    }
+  },
+  "acis": {
+    "status": "missing",
+    "avg_risk_score": null,
+    "high_risk_files": null,
+    "security_findings": null,
+    "analyzed_at": null,
+    "days_behind": null
+  },
+  "overall": "warn",
+  "findings": {
+    "pending": 0,
+    "answered": 0,
+    "skipped": 0,
+    "total": 0,
+    "by_type": {}
+  }
+}

@@ -41,14 +41,12 @@ Artiary uses `versions.yml` as the canonical manifest of all dependency versions
 
 import argparse
 import hashlib
-import json
 import lzma
 import os
 import re
 import sys
 import time
 from pathlib import Path
-from urllib.parse import urlparse
 
 # ─── Hard Requirements ───
 try:
@@ -85,11 +83,11 @@ except ImportError:
 
 try:
     from prompt_toolkit import Application
+    from prompt_toolkit.formatted_text import ANSI, to_formatted_text
     from prompt_toolkit.key_binding import KeyBindings
     from prompt_toolkit.layout import Layout, Window
     from prompt_toolkit.layout.controls import FormattedTextControl
     from prompt_toolkit.styles import Style
-    from prompt_toolkit.formatted_text import to_formatted_text, ANSI
     prompt_toolkit_available = True
 except ImportError:
     prompt_toolkit_available = False
