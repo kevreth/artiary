@@ -7,3 +7,8 @@ tmp/
 .claude/
 
 .codegraph/
+
+# Quality and analysis artifacts
+.acis/
+.coverage
+reports/
