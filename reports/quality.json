@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-03T09:12:44.237415+00:00",
+  "generated": "2026-06-03T14:19:40.971404+00:00",
   "stack": "python",
   "checks": {
     "lint": {
@@ -50,14 +50,14 @@
     }
   },
   "acis": {
-    "status": "missing",
-    "avg_risk_score": null,
-    "high_risk_files": null,
+    "status": "ok",
+    "avg_risk_score": 0.2194,
+    "high_risk_files": 1,
     "security_findings": null,
-    "analyzed_at": null,
+    "analyzed_at": "2026-06-03",
     "days_behind": null
   },
-  "overall": "warn",
+  "overall": "pass",
   "findings": {
     "pending": 0,
     "answered": 0,
