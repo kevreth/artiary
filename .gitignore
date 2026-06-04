@@ -12,3 +12,5 @@ tmp/
 .acis/
 .coverage
 reports/
+
+.venv/
