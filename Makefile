@@ -6,9 +6,9 @@ export ARTIARY_DATA_DIR ARTIARY_VERSIONS ARTIARY_ARTIFACTS
 
 SRC_DIR   := .
 TESTS_DIR := tests
-QUALITY_MK := /workspace/dashboard/tools/quality.mk
-CHECKS_MK  := /workspace/dashboard/tools/checks.mk
-TOOL_CONFIG := /workspace/dashboard/tools/pyproject-tool-config.toml
+QUALITY_MK := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))tools/quality.mk
+CHECKS_MK  := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))tools/checks.mk
+TOOL_CONFIG := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))tools/pyproject-tool-config.toml
 SEEDS_FILE := /workspace/autonomous-capital/harness/seeds/internal/repos.txt
 SERVE_DEFINED := 0
 include $(QUALITY_MK)
