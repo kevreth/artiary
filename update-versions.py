@@ -292,6 +292,9 @@ def check_script_packages(config: dict) -> list[tuple]:
             elif script == "quarto":
                 resp = requests.get("https://api.github.com/repos/quarto-dev/quarto-cli/releases/latest", timeout=10)
                 latest = resp.json().get("tag_name", "").lstrip("v")
+            elif script == "cypress":
+                resp = requests.get("https://registry.npmjs.org/cypress/latest", timeout=10)
+                latest = resp.json().get("version")
             else:
                 print(f"Warning: No check method for script {script}", file=sys.stderr)
                 continue
@@ -344,6 +347,9 @@ def resolve_script_version(script: str, info: dict | str) -> str | None:
             resp = fetch_response("https://mise.run")
             match = re.search(r'current_version="v([^"]+)"', resp.text)
             return match.group(1) if match else current
+        if script == "cypress":
+            resp = fetch_response("https://registry.npmjs.org/cypress/latest")
+            return resp.json().get("version")
         if script == "playwright-chromium":
             return current or "latest"
         if script == "quarto":

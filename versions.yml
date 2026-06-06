@@ -1,6 +1,7 @@
 image:
   base: "node:24-trixie"
 npm:
+  - "cypress"
   - "playwright"
   - "@charmland/crush"
   - "@google/gemini-cli"
@@ -28,6 +29,9 @@ scripts:
     url: "https://github.com/cli/cli/releases/download/v${version}/gh_${version}_linux_amd64.tar.gz"
   copilot:
     url: "https://github.com/github/copilot-cli/releases/download/v${version}/copilot-linux-x64.tar.gz"
+  cypress:
+    build: "builders/cypress/build.sh"
+    artifact: "cypress-offline.tar.gz"
   factory-droid:
     url: "https://downloads.factory.ai/factory-cli/releases/${version}/linux/x64/droid"
   goose:

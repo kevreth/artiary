@@ -168,7 +168,7 @@ if [ "$DOCKER_AVAILABLE" = true ]; then
     tgz="$NPM_DIR/$(echo "$pkg_name" | sed 's|^@||; s|/|-|g')-${pkg_ver}.tgz"
     if [ ! -f "$tgz" ]; then
       echo "  $spec"
-      CONTAINER=$(docker run -d "$BASE_IMAGE" sleep 600)
+      CONTAINER=$(docker run -d -e CYPRESS_INSTALL_BINARY=0 "$BASE_IMAGE" sleep 600)
       docker exec "$CONTAINER" npm install -g --prefix /opt/npm-global "$spec"
       tmpdir="$TMP_DIR/npm_${RANDOM}"
       mkdir -p "$tmpdir"
