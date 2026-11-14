@@ -39,7 +39,7 @@ testpaths = ["tests"]
 pythonpath = ["."]
 
 [tool.radon]
-exclude = ["update-versions.py"]
+exclude = ["update-versions.py", "tools/*"]
 
 [tool.coverage.report]
 fail_under = 0
